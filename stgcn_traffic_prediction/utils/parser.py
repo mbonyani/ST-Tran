@@ -49,4 +49,4 @@ def getparse():
     parse.add_argument('-warmup',type=int,default=100)
     parse.add_argument('-test_batch_size',type=int,default=1)
 
-    return parse.parse_args()
+    return parse.parse_args("")
