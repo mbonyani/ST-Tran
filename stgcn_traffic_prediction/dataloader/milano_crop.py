@@ -57,11 +57,11 @@ def _loader(f, nb_flow, traffic_type):
         exit(0)
 
 
-def load_data(path, traffic_type, closeness_size, period_size, trend_size, len_test, nb_flow):
-    f = h5py.File(path, 'r')
-    data = _loader(f, nb_flow, traffic_type)
-    index = f['idx'][:].astype(str)
-    index = to_datetime(index, format='%Y-%m-%d %H:%M')
+def load_data(data, traffic_type, closeness_size, period_size, trend_size, len_test, nb_flow):
+    #f = h5py.File(path, 'r')
+    #data = _loader(f, nb_flow, traffic_type)
+    #index = f['idx'][:].astype(str)
+    #index = to_datetime(index, format='%Y-%m-%d %H:%M')
 
     # wf = h5py.File('data.h5', 'w')
     # wf.create_dataset('data', data=data)
