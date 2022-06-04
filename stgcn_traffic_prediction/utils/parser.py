@@ -20,7 +20,7 @@ def getparse():
     parse.add_argument('-c',action='store_true')
     parse.add_argument('-s',action='store_true')
     parse.add_argument('-FS',action='store_true')
-    parse.add_argument('-nb_flow', type=int, default=2)
+    parse.add_argument('-nb_flow', type=int, default=1)
     parse.add_argument('-flow',type=int,choices=[0,1],default=0,help='in--0,out--1')
     parse.add_argument('-c_t',type=str,default='p',choices=['t','p','tp','c','r'])
     parse.add_argument('-s_t',type=str,default='c',choices=['t','p','tp','c','r'])
