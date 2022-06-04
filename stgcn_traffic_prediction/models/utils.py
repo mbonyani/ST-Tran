@@ -63,7 +63,7 @@ def getD(m):
 
 def getA_cosin(x):
     (bs,flow,N,c) = x.shape
-    x = x.transpose(1,2).contiguous().view((bs,N,c*2))
+    x = x.transpose(1,2).contiguous().view((bs,N,c*flow))
 
     normed = torch.norm(x,2,dim=-1).unsqueeze(-1)
     print(normed.shape)
@@ -74,7 +74,7 @@ def getA_cosin(x):
 
 def getA_corr(x):
     (bs,flow,N,c) = x.shape
-    x = x.transpose(1,2).contiguous().view((bs,N,c*2))
+    x = x.transpose(1,2).contiguous().view((bs,N,c*flow))
     A = torch.zeros((bs,N,N),dtype=torch.float32,requires_grad=False)
     for i in range(bs):
         A[i] = torch.from_numpy(np.absolute(np.corrcoef(x[i].numpy())))
@@ -85,7 +85,7 @@ def getA_corr(x):
 
 def getadj(x):
     (bs,flow,N,c) = x.shape
-    x = x.transpose(1,2).contiguous().view((bs,N,c*2)).numpy()
+    x = x.transpose(1,2).contiguous().view((bs,N,c*flow)).numpy()
     A = np.zeros((bs,N,N),dtype=np.float32)
     for i in range(bs):
         A[i] = np.absolute(np.corrcoef(x[i]))
