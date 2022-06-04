@@ -67,7 +67,7 @@ def load_data(data, traffic_type, closeness_size, period_size, trend_size, len_t
     # wf.create_dataset('data', data=data)
     # wf.create_dataset('idx', data=f['idx'])
     # wf.close()
-
+    index = np.arange(len(data))
     data_all = [data]
     index_all = [index]
 
