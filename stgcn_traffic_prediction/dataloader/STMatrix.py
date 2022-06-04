@@ -40,7 +40,7 @@ class STMatrix(object):
 
 
     def create_dataset(self, len_closeness=3, len_trend=3, TrendInterval=7, len_period=3, PeriodInterval=1):
-        offset_frame = pd.DateOffset(hours=1)
+        offset_frame = 1#pd.DateOffset(hours=1)
         XC = []
         XP = []
         XT = []
