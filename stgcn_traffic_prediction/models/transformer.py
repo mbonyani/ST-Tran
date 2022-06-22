@@ -190,9 +190,9 @@ class DecoderLayer(nn.Module):
     def forward(self, x, memory, tgt_mask):
         "Follow Figure 1 (right) for connections."
         m = memory
-        print("MMMMMEMOER:::",m.shape)
+        # print("MMMMMEMOER:::",m.shape)
         x = self.sublayer[0](x, lambda x: self.self_attn(x, x, x, tgt_mask))
-        print("MMMMMEMOER:::",x.shape)
+        # print("MMMMMEMOER:::",x.shape)
 
         x = self.sublayer[1](x, lambda x: self.src_attn(x, m, m))
         return self.sublayer[2](x, self.feed_forward)
@@ -502,10 +502,10 @@ class MUSEAttention2(nn.Module):
         
         b_s, nq = queries.shape[:2]
 
-        print("SHAPE::::",self.fc_q(queries).shape) #[64, 7, 3, 128]
-        print("self.d_k SHAPE::::",self.d_k)
-        print("self.h SHAPE::::",self.h)
-        print("self.d_v SHAPE::::",self.d_v)
+        # print("SHAPE::::",self.fc_q(queries).shape) #[64, 7, 3, 128]
+        # print("self.d_k SHAPE::::",self.d_k)
+        # print("self.h SHAPE::::",self.h)
+        # print("self.d_v SHAPE::::",self.d_v)
         nk = keys.shape[1]
 
         q = self.fc_q(queries).view(b_s, nq, self.h, self.d_k).permute(0, 2, 1, 3)  # (b_s, h, nq, d_k)
@@ -521,7 +521,7 @@ class MUSEAttention2(nn.Module):
         att=self.dropout(att)
 
         out = torch.matmul(att, v).permute(0, 2, 1, 3).contiguous().view(b_s, nq, self.h * self.d_v)  # (b_s, nq, h*d_v)
-        print("OUT::",out.shape)
+        # print("OUT::",out.shape)
         out = self.fc_o(out)  # (b_s, nq, d_model)
 
         v2=v.permute(0,1,3,2).contiguous().view(b_s,-1,nk) #bs,dim,n
@@ -531,7 +531,7 @@ class MUSEAttention2(nn.Module):
 
         out=out+out2
         out =  torch.unsqueeze(out,2)
-        print("OUT::",out.shape)
+        # print("OUT::",out.shape)
 
         return out
 def make_model(src_vocab, tgt_vocab, N=6, d_model=32, d_ff=64, h=8, dropout=0.1,spatial=False):
