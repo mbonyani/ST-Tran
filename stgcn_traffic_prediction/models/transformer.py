@@ -310,7 +310,7 @@ class MUSEAttention(nn.Module):
 
         #Self Attention
         b_s, nq = queries.shape[:2]
-        print("SHAPE::::",queries.shape)
+        print("SHAPE::::",self.fc_q(queries).shape) #[64, 7, 3, 128]
         print("self.d_k SHAPE::::",self.d_k)
         print("self.h SHAPE::::",self.h)
         print("self.d_v SHAPE::::",self.d_v)
