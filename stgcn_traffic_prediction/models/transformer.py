@@ -353,17 +353,106 @@ class MUSEAttention(nn.Module):
         print("OUT::",out.shape)
 
         return out
+        
+        
+        
+class MUSEAttention1(nn.Module):
+
+    def __init__(self, d_model, d_k, d_v, h,dropout=.1):
+
+
+        super(MUSEAttention1, self).__init__()
+        d_model = d_model
+        self.fc_q = nn.Linear(d_model, h * d_k)
+        self.fc_k = nn.Linear(d_model, h * d_k)
+        self.fc_v = nn.Linear(d_model, h * d_v)
+        self.fc_o = nn.Linear(h * d_v, d_model)
+        self.dropout = nn.Dropout(dropout)
+
+        self.conv1=Depth_Pointwise_Conv1d(h * d_v, d_model,1)
+        self.conv3=Depth_Pointwise_Conv1d(h * d_v, d_model,3)
+        self.conv5=Depth_Pointwise_Conv1d(h * d_v, d_model,5)
+        self.dy_paras=nn.Parameter(torch.ones(3))
+        self.softmax=nn.Softmax(-1)
+
+        self.d_model = d_model
+        self.d_k =  d_k
+        self.d_v =  d_v
+        self.h = h
+
+        self.init_weights()
+
+
+    def init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                init.kaiming_normal_(m.weight, mode='fan_out')
+                if m.bias is not None:
+                    init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                init.constant_(m.weight, 1)
+                init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                init.normal_(m.weight, std=0.001)
+                if m.bias is not None:
+                    init.constant_(m.bias, 0)
+
+    def forward(self, queries, keys, values, attention_mask=None, attention_weights=None):
+
+        #Self Attention
+        print("DEEEEEECODER::",queries.shape)
+        b_s, nq = queries.shape[:2]
+        # nq=3
+        queries = queries.view(b_s, nq, -1)
+        keys = keys.view(b_s, nq, -1)
+        values = values.view(b_s, nq, -1)
+        
+        b_s, nq = queries.shape[:2]
+
+        print("SHAPE::::",self.fc_q(queries).shape) #[64, 7, 3, 128]
+        print("self.d_k SHAPE::::",self.d_k)
+        print("self.h SHAPE::::",self.h)
+        print("self.d_v SHAPE::::",self.d_v)
+        nk = keys.shape[1]
+
+        q = self.fc_q(queries).view(b_s, nq, self.h, self.d_k).permute(0, 2, 1, 3)  # (b_s, h, nq, d_k)
+        k = self.fc_k(keys).view(b_s, nk, self.h, self.d_k).permute(0, 2, 3, 1)  # (b_s, h, d_k, nk)
+        v = self.fc_v(values).view(b_s, nk, self.h, self.d_v).permute(0, 2, 1, 3)  # (b_s, h, nk, d_v)
+
+        att = torch.matmul(q, k) / np.sqrt(self.d_k)  # (b_s, h, nq, nk)
+        if attention_weights is not None:
+            att = att * attention_weights
+        if attention_mask is not None:
+            att = att.masked_fill(attention_mask, -np.inf)
+        att = torch.softmax(att, -1)
+        att=self.dropout(att)
+
+        out = torch.matmul(att, v).permute(0, 2, 1, 3).contiguous().view(b_s, nq, self.h * self.d_v)  # (b_s, nq, h*d_v)
+        print("OUT::",out.shape)
+        out = self.fc_o(out)  # (b_s, nq, d_model)
+
+        v2=v.permute(0,1,3,2).contiguous().view(b_s,-1,nk) #bs,dim,n
+        self.dy_paras=nn.Parameter(self.softmax(self.dy_paras))
+        out2=self.dy_paras[0]*self.conv1(v2)+self.dy_paras[1]*self.conv3(v2)+self.dy_paras[2]*self.conv5(v2)
+        out2=out2.permute(0,2,1) #bs.n.dim
+
+        out=out+out2
+        out =  torch.unsqueeze(out,2)
+        print("OUT::",out.shape)
+
+        return out        
 def make_model(src_vocab, tgt_vocab, N=6, d_model=32, d_ff=64, h=8, dropout=0.1,spatial=False):
     "Helper: Construct a model from hyperparameters."
     c = copy.deepcopy
     # attn = MultiHeadedAttention(h, d_model)
     attn = MUSEAttention(d_model=d_model, d_k=d_model, d_v=d_model, h=h)
+    attn1 = MUSEAttention1(d_model=d_model, d_k=d_model, d_v=d_model, h=h)
     ff = PositionwiseFeedForward(d_model, d_ff, dropout)
     position = PositionalEncoding(d_model, dropout)
     if(spatial):
         model = EncoderDecoder(
         Encoder(EncoderLayer(d_model, c(attn), c(ff), dropout), N),
-        Decoder(DecoderLayer(d_model, c(attn), c(attn), 
+        Decoder(DecoderLayer(d_model, c(attn1), c(attn1), 
                             c(ff), dropout), N),
                             Embeddings(src_vocab, d_model),
                             Embeddings(tgt_vocab, d_model),
