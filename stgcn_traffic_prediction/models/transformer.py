@@ -310,10 +310,10 @@ class MUSEAttention(nn.Module):
 
         #Self Attention
         b_s, nq = queries.shape[:2]
-        print("SHAPE::::"queries.shape)
-        print("self.d_k SHAPE::::"self.d_k)
-        print("self.h SHAPE::::"self.h)
-        print("self.d_v SHAPE::::"self.d_v)
+        print("SHAPE::::",queries.shape)
+        print("self.d_k SHAPE::::",self.d_k)
+        print("self.h SHAPE::::",self.h)
+        print("self.d_v SHAPE::::",self.d_v)
         nk = keys.shape[1]
 
         q = self.fc_q(queries).view(b_s, nq, self.h, self.d_k).permute(0, 2, 1, 3)  # (b_s, h, nq, d_k)
