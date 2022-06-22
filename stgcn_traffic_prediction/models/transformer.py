@@ -269,3 +269,4 @@ def make_model(src_vocab, tgt_vocab, N=6, d_model=32, d_ff=64, h=8, dropout=0.1,
         if p.dim() > 1:
             nn.init.xavier_uniform(p)
     return model 
+    
