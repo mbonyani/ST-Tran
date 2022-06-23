@@ -141,7 +141,7 @@ class MultiHeadedAttention(nn.Module):
         x = x.transpose(-2, -3).contiguous() \
              .view(nbatches, N, -1, self.h * self.d_k)
         x = self.linears[-1](x)
-        print("FDDDDDDDD:::",x.shape)
+        #print("FDDDDDDDD:::",x.shape)
         return  x 
 
   
@@ -537,17 +537,17 @@ class MUSEAttention2(nn.Module):
 def make_model(src_vocab, tgt_vocab, N=6, d_model=32, d_ff=64, h=8, dropout=0.1,spatial=False):
     "Helper: Construct a model from hyperparameters."
     c = copy.deepcopy
-    # attn = MultiHeadedAttention(h, d_model)
-    attn = MUSEAttention(d_model=d_model, d_k=d_model, d_v=d_model, h=h)
-    attn1 = MUSEAttention1(d_model=d_model, d_k=d_model, d_v=d_model, h=h)
-    attn2 = MUSEAttention2(d_model=d_model, d_k=d_model, d_v=d_model, h=h)
+    attn = MultiHeadedAttention(h, d_model)
+    #attn = MUSEAttention(d_model=d_model, d_k=d_model, d_v=d_model, h=h)
+    #attn1 = MUSEAttention1(d_model=d_model, d_k=d_model, d_v=d_model, h=h)
+    #attn2 = MUSEAttention2(d_model=d_model, d_k=d_model, d_v=d_model, h=h)
 
     ff = PositionwiseFeedForward(d_model, d_ff, dropout)
     position = PositionalEncoding(d_model, dropout)
     if(spatial):
         model = EncoderDecoder(
         Encoder(EncoderLayer(d_model, c(attn), c(ff), dropout), N),
-        Decoder(DecoderLayer(d_model, c(attn1), c(attn2), 
+        Decoder(DecoderLayer(d_model, c(attn), c(attn), 
                             c(ff), dropout), N),
                             Embeddings(src_vocab, d_model),
                             Embeddings(tgt_vocab, d_model),
@@ -555,7 +555,7 @@ def make_model(src_vocab, tgt_vocab, N=6, d_model=32, d_ff=64, h=8, dropout=0.1,
     else:
         model = EncoderDecoder(
             Encoder(EncoderLayer(d_model, c(attn), c(ff), dropout), N),
-            Decoder(DecoderLayer(d_model, c(attn1), c(attn2), 
+            Decoder(DecoderLayer(d_model, c(attn), c(attn), 
                                 c(ff), dropout), N),
             nn.Sequential(Embeddings(src_vocab, d_model), c(position)),
             nn.Sequential(Embeddings(tgt_vocab, d_model), c(position)),
