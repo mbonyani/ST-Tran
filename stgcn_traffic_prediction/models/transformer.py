@@ -717,7 +717,7 @@ class MUSEAttention2(nn.Module):
         
         
         
- '''      
+'''      
 class MUSEAttention2(nn.Module):
 
     def __init__(self, d_model, d_k, d_v, h,dropout=.1):
